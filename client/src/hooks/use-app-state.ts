@@ -182,7 +182,7 @@ export const apps: AppDefinition[] = [
     category: 'more'
   },
   {
-    id: 'settings',
+    id: 'settings-app',
     name: 'Settings',
     icon: Settings,
     color: 'bg-secondary-dark text-white',

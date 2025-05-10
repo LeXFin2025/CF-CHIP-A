@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
+import { ProxyFrame } from './ProxyFrame';
 
 export function BrowserView() {
   const { currentUrl, updateActiveTabUrl } = useTabs();
@@ -148,15 +149,25 @@ export function BrowserView() {
         </div>
       )}
       
-      <iframe
-        ref={iframeRef}
-        src={validUrl}
-        title="Browser View"
-        className="w-full h-full border-0"
-        onLoad={handleIframeLoad}
-        onError={handleIframeError}
-        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-      />
+      {validUrl.startsWith('https://') || validUrl.startsWith('http://') ? (
+        <ProxyFrame
+          url={validUrl}
+          onLoad={handleIframeLoad}
+          onError={handleIframeError}
+          className="w-full h-full border-0"
+        />
+      ) : (
+        <iframe
+          ref={iframeRef}
+          src={validUrl}
+          title="Browser View"
+          className="w-full h-full border-0"
+          onLoad={handleIframeLoad}
+          onError={handleIframeError}
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation allow-top-navigation-by-user-activation"
+          referrerPolicy="no-referrer"
+        />
+      )}
     </div>
   );
 }
