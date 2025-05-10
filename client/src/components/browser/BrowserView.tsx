@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
 import { ProxyFrame } from './ProxyFrame';
+import { DirectWebsites } from './DirectWebsites';
 
 export function BrowserView() {
   const { currentUrl, updateActiveTabUrl } = useTabs();
@@ -75,20 +76,12 @@ export function BrowserView() {
     // We're not using an iframe for the home page
     return (
       <div className="flex-1 overflow-y-auto p-4 bg-[#121212] text-white">
-        <div className="container mx-auto max-w-4xl py-12">
+        <div className="container mx-auto max-w-4xl py-8">
           <h1 className="text-4xl font-bold mb-6 bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">Welcome to Centrifugal Browser</h1>
           
+          <DirectWebsites onNavigate={(url) => updateActiveTabUrl(url)} />
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-            <Card className="p-6 bg-[#1a1a1a] border-[#333] text-white">
-              <h2 className="text-2xl font-semibold mb-4">Quick Links</h2>
-              <div className="space-y-2">
-                <a href="https://google.com" className="block p-2 hover:bg-[#333] rounded transition-colors">Google</a>
-                <a href="https://github.com" className="block p-2 hover:bg-[#333] rounded transition-colors">GitHub</a>
-                <a href="https://youtube.com" className="block p-2 hover:bg-[#333] rounded transition-colors">YouTube</a>
-                <a href="https://reddit.com" className="block p-2 hover:bg-[#333] rounded transition-colors">Reddit</a>
-              </div>
-            </Card>
-            
             <Card className="p-6 bg-[#1a1a1a] border-[#333] text-white">
               <h2 className="text-2xl font-semibold mb-4">Integrated Apps</h2>
               <div className="space-y-2">
@@ -98,9 +91,7 @@ export function BrowserView() {
                 <a href="/drive" className="block p-2 hover:bg-[#333] rounded transition-colors">Drive</a>
               </div>
             </Card>
-          </div>
-          
-          <div className="mt-12">
+            
             <Card className="p-6 bg-[#1a1a1a] border-[#333] text-white">
               <h2 className="text-2xl font-semibold mb-4">About Centrifugal Browser</h2>
               <p className="mb-4">

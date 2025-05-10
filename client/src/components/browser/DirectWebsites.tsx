@@ -1,4 +1,4 @@
-import { Google, Github, Youtube, Mail, Twitter, Facebook, Linkedin, Instagram } from 'lucide-react';
+import { Search, Github, Youtube, Mail, Twitter, Facebook, Linkedin, Instagram } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 interface DirectWebsiteProps {
@@ -7,7 +7,7 @@ interface DirectWebsiteProps {
 
 export function DirectWebsites({ onNavigate }: DirectWebsiteProps) {
   const websites = [
-    { name: 'Google', url: 'https://google.com', icon: Google },
+    { name: 'Google', url: 'https://google.com', icon: Search },
     { name: 'YouTube', url: 'https://youtube.com', icon: Youtube },
     { name: 'GitHub', url: 'https://github.com', icon: Github },
     { name: 'Gmail', url: 'https://mail.google.com', icon: Mail },
