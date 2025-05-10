@@ -42,6 +42,7 @@ export default function Settings() {
   const { setCurrentApp } = useAppState();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [_, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState('domains');
   const [addDomainOpen, setAddDomainOpen] = useState(false);
   const [newDomain, setNewDomain] = useState('');
