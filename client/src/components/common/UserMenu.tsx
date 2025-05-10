@@ -25,6 +25,8 @@ const UserMenu = ({ user }: UserMenuProps) => {
   const [currentUser, setCurrentUser] = useState<User | null>(user);
   const location = useLocation();
 
+export default UserMenu;
+
   useEffect(() => {
     const handleAuthentication = (event: MessageEvent) => {
       if (event.origin === 'https://auth.util.repl.co') {
