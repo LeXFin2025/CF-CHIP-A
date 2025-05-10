@@ -288,6 +288,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     files.push(newFile);
     res.status(201).json(newFile);
   });
+  
+  // Domain management routes
+  app.get('/api/domains', (req: Request, res: Response) => {
+    const { getAllDomains } = require('./domains');
+    res.json(getAllDomains());
+  });
+  
+  app.post('/api/domains', (req: Request, res: Response) => {
+    const { addDomain } = require('./domains');
+    const { userId, domain } = req.body;
+    
+    if (!domain) {
+      return res.status(400).json({ error: 'Domain name is required' });
+    }
+    
+    try {
+      const newDomain = addDomain(userId || 1, domain);
+      
+      // Send a verification email
+      const sendVerificationEmail = async () => {
+        const { sendEmail } = await import('./sendgrid');
+        const verificationUrl = `https://centrifugalbrowser.com/verify-domain/${newDomain.id}/${newDomain.verificationToken}`;
+        
+        await sendEmail({
+          to: `admin@${domain}`,
+          from: 'verification@centrifugalforce.free.nf',
+          subject: 'Verify your domain with Centrifugal Browser',
+          text: `Please verify your domain ownership by visiting: ${verificationUrl}`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2>Domain Verification</h2>
+              <p>Thank you for adding <strong>${domain}</strong> to Centrifugal Browser.</p>
+              <p>To verify your domain ownership, you need to:</p>
+              <ol>
+                <li>Add a DNS TXT record with the value: <code>${newDomain.verificationToken}</code></li>
+                <li>Or click <a href="${verificationUrl}">this verification link</a></li>
+              </ol>
+              <p>Once verified, you'll be able to create up to ${newDomain.maxUsers} email accounts on your domain.</p>
+            </div>
+          `
+        });
+      };
+      
+      // Don't wait for the email to be sent
+      sendVerificationEmail().catch(console.error);
+      
+      res.status(201).json(newDomain);
+    } catch (error) {
+      console.error('Error adding domain:', error);
+      res.status(500).json({ error: 'Failed to add domain' });
+    }
+  });
+  
+  app.get('/api/domains/:id', (req: Request, res: Response) => {
+    const { getDomain } = require('./domains');
+    const domainId = parseInt(req.params.id);
+    const domain = getDomain(domainId);
+    
+    if (!domain) {
+      return res.status(404).json({ error: 'Domain not found' });
+    }
+    
+    res.json(domain);
+  });
+  
+  app.post('/api/domains/verify', (req: Request, res: Response) => {
+    const { verifyDomain } = require('./domains');
+    const { domainId, token } = req.body;
+    
+    if (!domainId || !token) {
+      return res.status(400).json({ error: 'Domain ID and verification token are required' });
+    }
+    
+    const verified = verifyDomain(parseInt(domainId), token);
+    
+    if (verified) {
+      res.json({ success: true, message: 'Domain verified successfully' });
+    } else {
+      res.status(400).json({ success: false, error: 'Invalid verification token' });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;
