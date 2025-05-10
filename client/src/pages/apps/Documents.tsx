@@ -3,6 +3,9 @@ import { useAppState } from '@/hooks/use-app-state';
 import { FileText, Folder, Star, Clock, Trash, Plus, Search, Upload, MoreVertical, Download, Pencil, Copy, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -23,12 +26,17 @@ import { Textarea } from '@/components/ui/textarea';
 
 export default function Documents() {
   const { setCurrentApp } = useAppState();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [activeFolder, setActiveFolder] = useState<string>('my-documents');
   const [selectedDoc, setSelectedDoc] = useState<any | null>(null);
   const [createDocOpen, setCreateDocOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [newDoc, setNewDoc] = useState({
     title: '',
-    content: ''
+    content: '',
+    folder: 'my-documents',
+    starred: false
   });
   
   // Set the current app when component mounts
@@ -36,15 +44,11 @@ export default function Documents() {
     setCurrentApp('documents');
   }, [setCurrentApp]);
   
-  // Sample documents data
-  const documents = [
-    { id: 1, title: 'Project Proposal', folder: 'my-documents', modified: '2023-09-10T14:30:00Z', starred: true },
-    { id: 2, title: 'Meeting Notes', folder: 'my-documents', modified: '2023-09-15T09:45:00Z', starred: false },
-    { id: 3, title: 'Budget Report', folder: 'my-documents', modified: '2023-09-18T16:15:00Z', starred: true },
-    { id: 4, title: 'Marketing Plan', folder: 'my-documents', modified: '2023-09-20T11:20:00Z', starred: false },
-    { id: 5, title: 'Client Feedback', folder: 'shared', modified: '2023-09-22T13:10:00Z', starred: false },
-    { id: 6, title: 'Product Roadmap', folder: 'shared', modified: '2023-09-25T15:30:00Z', starred: true },
-  ];
+  // Fetch documents
+  const { data: documents = [], isLoading } = useQuery({
+    queryKey: ['/api/documents'],
+    refetchInterval: 5000 // Refetch every 5 seconds
+  });
   
   const folders = [
     { id: 'my-documents', name: 'My Documents', icon: <FileText className="h-5 w-5" /> },
@@ -54,16 +58,72 @@ export default function Documents() {
     { id: 'trash', name: 'Trash', icon: <Trash className="h-5 w-5" /> }
   ];
   
-  const filteredDocs = activeFolder === 'starred' 
-    ? documents.filter(doc => doc.starred)
-    : activeFolder === 'recent'
-    ? [...documents].sort((a, b) => new Date(b.modified).getTime() - new Date(a.modified).getTime()).slice(0, 5)
-    : documents.filter(doc => doc.folder === activeFolder);
+  // Filter documents based on folder and search
+  const filteredDocs = documents.filter(doc => {
+    // Search filter
+    const matchesSearch = searchQuery === '' || 
+      doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (doc.content && doc.content.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    // Folder filter
+    let matchesFolder = true;
+    if (activeFolder === 'starred') {
+      matchesFolder = doc.starred;
+    } else if (activeFolder === 'recent') {
+      // We'll handle recent separately
+      matchesFolder = true;
+    } else {
+      matchesFolder = doc.folder === activeFolder;
+    }
+    
+    return matchesSearch && matchesFolder;
+  });
   
-  const handleCreateDoc = () => {
-    // In a real app, this would create a document in the database
-    setNewDoc({ title: '', content: '' });
-    setCreateDocOpen(false);
+  // Sort by most recent if in 'recent' folder
+  const sortedDocs = activeFolder === 'recent'
+    ? [...filteredDocs].sort((a, b) => {
+        const dateA = a.updatedAt || a.createdAt;
+        const dateB = b.updatedAt || b.createdAt;
+        return new Date(dateB).getTime() - new Date(dateA).getTime();
+      }).slice(0, 5)
+    : filteredDocs;
+  
+  const handleCreateDoc = async () => {
+    if (!newDoc.title.trim()) {
+      toast({
+        title: "Error",
+        description: "Document title is required",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      await apiRequest('POST', '/api/documents', newDoc);
+      
+      // Refresh documents list
+      queryClient.invalidateQueries({ queryKey: ['/api/documents'] });
+      
+      toast({
+        title: "Success",
+        description: "Document created successfully",
+      });
+      
+      // Reset form and close dialog
+      setNewDoc({
+        title: '',
+        content: '',
+        folder: 'my-documents',
+        starred: false
+      });
+      setCreateDocOpen(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create document",
+        variant: "destructive"
+      });
+    }
   };
   
   return (
@@ -116,6 +176,8 @@ export default function Documents() {
             <Input 
               placeholder="Search documents" 
               className="pl-10"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
         </div>
@@ -161,7 +223,15 @@ export default function Documents() {
         </div>
         
         <div className="p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {filteredDocs.length === 0 ? (
+          {isLoading ? (
+            <div className="col-span-full text-center py-10 text-neutral-medium">
+              <div className="animate-pulse flex flex-col items-center">
+                <div className="rounded-lg bg-neutral-light h-12 w-12 mb-4"></div>
+                <div className="h-4 bg-neutral-light rounded w-24 mb-3"></div>
+                <div className="h-3 bg-neutral-light rounded w-32"></div>
+              </div>
+            </div>
+          ) : sortedDocs.length === 0 ? (
             <div className="col-span-full text-center py-10 text-neutral-medium">
               <FileText className="h-12 w-12 mx-auto mb-4 text-neutral-light" />
               <p>No documents found</p>

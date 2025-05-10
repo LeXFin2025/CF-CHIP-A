@@ -225,10 +225,9 @@ export const useAppState = create<AppState>()(
       ],
       user: {
         id: 1,
-        username: 'johndoe',
-        displayName: 'John Doe',
-        email: 'john.doe@centrifugalforce.free.nf',
-        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=250&h=250'
+        username: 'user',
+        displayName: 'Current User',
+        email: 'user@centrifugalforce.free.nf'
       },
       setSidebarOpen: (open) => set({ sidebarOpen: open }),
       setCurrentApp: (app) => set({ currentApp: app }),

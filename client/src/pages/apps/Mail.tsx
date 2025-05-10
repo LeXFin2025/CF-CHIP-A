@@ -44,6 +44,7 @@ export default function Mail() {
   // Fetch emails
   const { data: emails = [], isLoading, refetch } = useQuery<Email[]>({
     queryKey: ['/api/emails', activeFolder],
+    refetchInterval: 10000 // Refetch every 10 seconds
   });
   
   const filteredEmails = emails.filter(email => email.folder === activeFolder);
