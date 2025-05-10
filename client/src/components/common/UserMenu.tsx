@@ -19,6 +19,19 @@ interface UserMenuProps {
 export function UserMenu({ user, trigger }: UserMenuProps) {
   const [, navigate] = useLocation();
   
+  if (!user) {
+    return (
+      <Button 
+        variant="outline" 
+        className="flex items-center gap-2"
+        onClick={() => window.open("/__repl_auth/login", "auth", "width=500,height=600")}
+      >
+        <UserIcon className="h-4 w-4" />
+        Sign in with Replit
+      </Button>
+    );
+  }
+  
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
