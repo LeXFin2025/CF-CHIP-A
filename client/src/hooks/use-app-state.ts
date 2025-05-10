@@ -46,6 +46,14 @@ export const apps: AppDefinition[] = [
     category: 'main'
   },
   {
+    id: 'settings',
+    name: 'Settings',
+    icon: Settings,
+    color: 'bg-neutral-dark text-white',
+    route: '/settings',
+    category: 'main'
+  },
+  {
     id: 'documents',
     name: 'Documents',
     icon: FileText,

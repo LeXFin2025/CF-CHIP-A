@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAppState } from '@/hooks/use-app-state';
+import { useLocation } from 'wouter';
 import { Globe, Plus, RefreshCw, Trash, Check, X, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -54,7 +55,7 @@ export default function Settings() {
   }, [setCurrentApp]);
   
   // Fetch domains
-  const { data: domains = [], isLoading } = useQuery({
+  const { data: domains = [] as Domain[], isLoading } = useQuery<Domain[]>({
     queryKey: ['/api/domains'],
   });
   
@@ -266,8 +267,13 @@ export default function Settings() {
                     </CardContent>
                     <CardFooter className="flex justify-between">
                       {domain.verified ? (
-                        <Button variant="outline" size="sm" className="w-full">
-                          <Plus className="h-4 w-4 mr-2" /> Add Users
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full"
+                          onClick={() => setLocation(`/domain-users/${domain.id}`)}
+                        >
+                          <Plus className="h-4 w-4 mr-2" /> Manage Users
                         </Button>
                       ) : (
                         <Button size="sm" className="w-full" onClick={() => openVerifyDialog(domain)}>

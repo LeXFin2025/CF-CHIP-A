@@ -24,6 +24,7 @@ import Calculator from "@/pages/apps/Calculator";
 import CodeEditor from "@/pages/apps/CodeEditor";
 import PasswordManager from "@/pages/apps/PasswordManager";
 import Settings from "@/pages/apps/Settings";
+import DomainEmailUsers from "@/pages/apps/DomainEmailUsers";
 import AppLayout from "@/components/layout/AppLayout";
 
 function App() {
@@ -53,6 +54,7 @@ function App() {
             <Route path="/code-editor" component={CodeEditor} />
             <Route path="/password-manager" component={PasswordManager} />
             <Route path="/settings" component={Settings} />
+            <Route path="/domain-users/:id" component={DomainEmailUsers} />
             <Route component={NotFound} />
           </Switch>
         </AppLayout>

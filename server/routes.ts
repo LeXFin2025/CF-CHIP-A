@@ -369,6 +369,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json({ success: false, error: 'Invalid verification token' });
     }
   });
+  
+  // Domain users routes
+  app.get('/api/domains/:id/users', (req: Request, res: Response) => {
+    const { getDomainUsers } = require('./domain-users');
+    const { getDomain } = require('./domains');
+    
+    const domainId = parseInt(req.params.id);
+    const domain = getDomain(domainId);
+    
+    if (!domain) {
+      return res.status(404).json({ error: 'Domain not found' });
+    }
+    
+    const users = getDomainUsers(domainId);
+    res.json(users);
+  });
+  
+  app.post('/api/domains/:id/users', (req: Request, res: Response) => {
+    const { addDomainUser, isDomainUsernameTaken, getDomainUserCount } = require('./domain-users');
+    const { getDomain, addUserToDomain } = require('./domains');
+    
+    const domainId = parseInt(req.params.id);
+    const { username, displayName } = req.body;
+    
+    if (!username) {
+      return res.status(400).json({ error: 'Username is required' });
+    }
+    
+    const domain = getDomain(domainId);
+    
+    if (!domain) {
+      return res.status(404).json({ error: 'Domain not found' });
+    }
+    
+    if (!domain.verified) {
+      return res.status(400).json({ error: 'Domain must be verified before adding users' });
+    }
+    
+    // Check if username is already taken
+    if (isDomainUsernameTaken(domainId, username)) {
+      return res.status(400).json({ error: 'Username is already taken for this domain' });
+    }
+    
+    // Check if domain user limit is reached
+    const currentCount = getDomainUserCount(domainId);
+    if (currentCount >= domain.maxUsers) {
+      return res.status(400).json({ error: 'Maximum number of users reached for this domain' });
+    }
+    
+    // Add user and update domain counter
+    const newUser = addDomainUser(domainId, username, displayName);
+    addUserToDomain(domainId);
+    
+    res.status(201).json(newUser);
+  });
+  
+  app.delete('/api/domains/:domainId/users/:userId', (req: Request, res: Response) => {
+    const { deleteDomainUser, getDomainUser } = require('./domain-users');
+    const { getDomain } = require('./domains');
+    
+    const domainId = parseInt(req.params.domainId);
+    const userId = parseInt(req.params.userId);
+    
+    const domain = getDomain(domainId);
+    
+    if (!domain) {
+      return res.status(404).json({ error: 'Domain not found' });
+    }
+    
+    const user = getDomainUser(userId);
+    
+    if (!user || user.domainId !== domainId) {
+      return res.status(404).json({ error: 'User not found for this domain' });
+    }
+    
+    const deleted = deleteDomainUser(userId);
+    
+    if (deleted) {
+      res.json({ success: true, message: 'User deleted successfully' });
+    } else {
+      res.status(500).json({ error: 'Failed to delete user' });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;
