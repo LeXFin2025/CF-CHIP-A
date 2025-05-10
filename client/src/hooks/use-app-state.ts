@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { AppDefinition, Notification, User } from '@/types';
-import { LucideBrowser, Mail, CalendarDays, FileText, PencilLine, ListTodo, Users, FolderOpen, MapPin, Languages, Cloud, Newspaper, Image, Music, Video, Mic, Calculator, Code, KeyRound, Settings } from 'lucide-react';
+import { Globe, Mail, CalendarDays, FileText, PencilLine, ListTodo, Users, FolderOpen, MapPin, Languages, Cloud, Newspaper, Image, Music, Video, Mic, Calculator, Code, KeyRound, Settings } from 'lucide-react';
 
 interface AppState {
   currentApp: string;
@@ -24,7 +24,7 @@ export const apps: AppDefinition[] = [
   {
     id: 'browser',
     name: 'Browser',
-    icon: LucideBrowser,
+    icon: Globe,
     color: 'bg-primary text-white',
     route: '/browser',
     category: 'main'

@@ -49,7 +49,7 @@ export interface Event {
 export interface AppDefinition {
   id: string;
   name: string;
-  icon: React.ReactNode;
+  icon: any; // Using any to accommodate Lucide component types
   color: string;
   route: string;
   category: 'main' | 'productivity' | 'tools' | 'media' | 'more';

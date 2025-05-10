@@ -42,7 +42,7 @@ export default function Tasks() {
     description: '',
     dueDate: '',
     list: 'inbox',
-    priority: 'medium' as const,
+    priority: 'medium' as 'low' | 'medium' | 'high',
   });
   
   // Set the current app when component mounts

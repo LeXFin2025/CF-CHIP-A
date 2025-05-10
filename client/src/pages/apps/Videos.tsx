@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAppState } from '@/hooks/use-app-state';
-import { Film, Search, Play, MoreVertical, Clock, GridIcon, List, Filter, Bookmark, Share2 } from 'lucide-react';
+import { Film, Search, Play, MoreVertical, Clock, Grid, List, Filter, Bookmark, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -278,7 +278,7 @@ export default function Videos() {
               size="icon"
               onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
             >
-              {viewMode === 'grid' ? <List className="h-5 w-5" /> : <GridIcon className="h-5 w-5" />}
+              {viewMode === 'grid' ? <List className="h-5 w-5" /> : <Grid className="h-5 w-5" />}
             </Button>
             <Button variant="ghost" size="icon">
               <Filter className="h-5 w-5" />
@@ -447,7 +447,7 @@ export default function Videos() {
   );
 }
 
-function GridIcon(props: React.SVGProps<SVGSVGElement>) {
+function CustomGrid(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

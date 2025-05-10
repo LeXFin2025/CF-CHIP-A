@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAppState } from '@/hooks/use-app-state';
-import { Music as MusicIcon, Search, Play, SkipBack, SkipForward, Pause, Volume2, Repeat, Shuffle, Heart, MoreVertical, List, GridIcon } from 'lucide-react';
+import { Music as MusicIcon, Search, Play, SkipBack, SkipForward, Pause, Volume2, Repeat, Shuffle, Heart, MoreVertical, List, Grid } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
@@ -320,7 +320,7 @@ export default function Music() {
               size="icon"
               onClick={() => setViewMode(viewMode === 'list' ? 'grid' : 'list')}
             >
-              {viewMode === 'list' ? <GridIcon className="h-5 w-5" /> : <List className="h-5 w-5" />}
+              {viewMode === 'list' ? <Grid className="h-5 w-5" /> : <List className="h-5 w-5" />}
             </Button>
           </div>
         </div>
@@ -566,7 +566,7 @@ export default function Music() {
   );
 }
 
-function GridIcon(props: React.SVGProps<SVGSVGElement>) {
+function CustomGrid(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

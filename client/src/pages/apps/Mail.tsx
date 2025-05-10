@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAppState } from '@/hooks/use-app-state';
-import { Mail, Inbox, Send, Star, Archive, Trash, Plus, RefreshCw, Upload, Settings } from 'lucide-react';
+import { Mail as MailIcon, Inbox, Send, Star, Archive, Trash, Plus, RefreshCw, Upload, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -243,7 +243,7 @@ export default function Mail() {
         ) : (
           <div className="h-full flex items-center justify-center text-neutral-medium">
             <div className="text-center">
-              <Mail className="h-16 w-16 mx-auto mb-4 text-neutral-light" />
+              <MailIcon className="h-16 w-16 mx-auto mb-4 text-neutral-light" />
               <p>Select an email to read</p>
             </div>
           </div>
