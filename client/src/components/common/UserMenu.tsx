@@ -7,6 +7,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuContent,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { UserCog, LogOut } from 'lucide-react';
@@ -19,11 +20,12 @@ import {
 
 interface UserMenuProps {
   user: User | null;
+  trigger?: React.ReactNode;
 }
 
-const UserMenu = ({ user }: UserMenuProps) => {
+const UserMenu = ({ user, trigger }: UserMenuProps) => {
   const [currentUser, setCurrentUser] = useState<User | null>(user);
-  const location = useLocation();
+  const [_, navigate] = useLocation();
 
   useEffect(() => {
     const handleAuthentication = (event: MessageEvent) => {
@@ -51,7 +53,7 @@ const UserMenu = ({ user }: UserMenuProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button>{currentUser ? currentUser.username : 'Login / Sign Up'}</Button>
+        {trigger || <Button>{currentUser ? currentUser.username : 'Login / Sign Up'}</Button>}
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         {currentUser ? (
@@ -77,7 +79,7 @@ const UserMenu = ({ user }: UserMenuProps) => {
             <span>Please log in or sign up</span>
             <div>
               <script
-                authed="location.reload()"
+                data-authed="location.reload()"
                 src="https://auth.util.repl.co/script.js"
               ></script>
             </div>
