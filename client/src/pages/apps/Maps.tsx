@@ -53,6 +53,35 @@ export default function Maps() {
     // In a real app, this would trigger an API call
   };
   
+  // Calculate map URL based on mapType and zoom
+  const getMapUrl = () => {
+    // Default coordinates (New York City)
+    const lat = 40.7128;
+    const lng = -74.0060;
+    
+    // Base URL for OpenStreetMap
+    let url = `https://www.openstreetmap.org/export/embed.html?bbox=${lng-5},${lat-5},${lng+5},${lat+5}&amp;layer=`;
+    
+    // Add map type
+    switch(mapType) {
+      case 'satellite':
+        url += 'cyclemap'; // OpenStreetMap doesn't have true satellite, use cycle map instead
+        break;
+      case 'terrain':
+        url += 'transportmap'; // Use transport map for terrain
+        break;
+      default:
+        url += 'mapnik'; // Standard map
+    }
+    
+    // Add zoom (OpenStreetMap handles zoom differently)
+    // So we'll just use a different bounding box based on zoom
+    const zoomFactor = 20 / zoom; // Inverse relationship
+    url = `https://www.openstreetmap.org/export/embed.html?bbox=${lng-zoomFactor},${lat-zoomFactor},${lng+zoomFactor},${lat+zoomFactor}&amp;layer=mapnik`;
+    
+    return url;
+  };
+
   const handleZoomIn = () => {
     setZoom(prev => Math.min(prev + 1, 20));
   };
@@ -219,15 +248,15 @@ export default function Maps() {
       
       {/* Map View */}
       <div className="flex-1 bg-neutral-lightest relative">
-        {/* Map content - In a real app, this would be a map component */}
-        <div className="h-full w-full flex items-center justify-center">
-          <div className="text-center">
-            <Map className="h-32 w-32 text-neutral-light mx-auto mb-4" />
-            <p className="text-neutral-medium">
-              In a real application, this would display an interactive map using a library like Google Maps, Mapbox, or Leaflet.
-            </p>
-          </div>
-        </div>
+        {/* Embedded map using OpenStreetMap */}
+        <iframe 
+          src={getMapUrl()}
+          style={{ border: 0, width: '100%', height: '100%' }}
+          allowFullScreen
+          loading="lazy"
+          title="Interactive Map"
+          key={`${mapType}-${zoom}`} // Re-render iframe when these values change
+        ></iframe>
         
         {/* Map Controls */}
         <div className="absolute top-4 right-4 bg-white rounded-md shadow-md">
@@ -276,7 +305,7 @@ export default function Maps() {
                   size="icon"
                   onClick={() => setMapType('satellite')}
                 >
-                  <Satellite className="h-5 w-5" />
+                  <Layers className="h-5 w-5" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Satellite</TooltipContent>
@@ -289,7 +318,7 @@ export default function Maps() {
                   size="icon"
                   onClick={() => setMapType('terrain')}
                 >
-                  <Mountain className="h-5 w-5" />
+                  <Navigation className="h-5 w-5" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Terrain</TooltipContent>

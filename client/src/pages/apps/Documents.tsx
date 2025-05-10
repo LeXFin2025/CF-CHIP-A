@@ -58,8 +58,19 @@ export default function Documents() {
     { id: 'trash', name: 'Trash', icon: <Trash className="h-5 w-5" /> }
   ];
   
+  // Document type definition
+  interface Document {
+    id: number;
+    title: string;
+    content?: string;
+    folder: string;
+    starred: boolean;
+    createdAt: string;
+    updatedAt?: string;
+  }
+
   // Filter documents based on folder and search
-  const filteredDocs = documents.filter(doc => {
+  const filteredDocs = (documents as Document[]).filter(doc => {
     // Search filter
     const matchesSearch = searchQuery === '' || 
       doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -235,9 +246,10 @@ export default function Documents() {
             <div className="col-span-full text-center py-10 text-neutral-medium">
               <FileText className="h-12 w-12 mx-auto mb-4 text-neutral-light" />
               <p>No documents found</p>
+              <p className="mt-2 text-sm">Click the "Create Document" button to get started</p>
             </div>
           ) : (
-            filteredDocs.map((doc) => (
+            sortedDocs.map((doc: Document) => (
               <div 
                 key={doc.id}
                 className={`p-4 border rounded-lg cursor-pointer transition-colors hover:border-primary ${
@@ -251,7 +263,7 @@ export default function Documents() {
                     <div>
                       <div className="font-medium">{doc.title}</div>
                       <div className="text-xs text-neutral-medium">
-                        {new Date(doc.modified).toLocaleDateString()}
+                        {new Date(doc.updatedAt || doc.createdAt).toLocaleDateString()}
                       </div>
                     </div>
                   </div>

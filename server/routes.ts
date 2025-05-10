@@ -2,8 +2,80 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 
+// Type definitions
+interface Email {
+  id: number;
+  from: string;
+  to: string;
+  subject: string;
+  content: string;
+  read: boolean;
+  folder: string;
+  timestamp: string;
+}
+
+interface Document {
+  id: number;
+  title: string;
+  content: string;
+  folder: string;
+  starred: boolean;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+interface Note {
+  id: number;
+  title: string;
+  content: string;
+  color?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+interface Task {
+  id: number;
+  title: string;
+  description?: string;
+  completed: boolean;
+  dueDate?: string;
+  priority?: string;
+  list?: string;
+  createdAt: string;
+}
+
+interface Event {
+  id: number;
+  title: string;
+  description?: string;
+  startTime: string;
+  endTime: string;
+  allDay: boolean;
+  location?: string;
+  createdAt: string;
+}
+
+interface Contact {
+  id: number;
+  name: string;
+  email?: string;
+  phone?: string;
+  company?: string;
+  notes?: string;
+  createdAt: string;
+}
+
+interface File {
+  id: number;
+  name: string;
+  type: string;
+  size: number;
+  path?: string;
+  uploadedAt: string;
+}
+
 // Sample data for development
-let emails = [
+let emails: Email[] = [
   {
     id: 1,
     from: "system@centrifugalforce.free.nf",
@@ -16,12 +88,12 @@ let emails = [
   }
 ];
 
-let documents = [];
-let notes = [];
-let tasks = [];
-let events = [];
-let contacts = [];
-let files = [];
+let documents: Document[] = [];
+let notes: Note[] = [];
+let tasks: Task[] = [];
+let events: Event[] = [];
+let contacts: Contact[] = [];
+let files: File[] = [];
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // User routes
