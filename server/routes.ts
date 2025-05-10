@@ -112,32 +112,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(emails);
   });
 
-  app.post('/api/emails', (req: Request, res: Response) => {
-    const newEmail = {
-      id: emails.length > 0 ? Math.max(...emails.map(e => e.id)) + 1 : 1,
-      ...req.body,
-      read: false,
-      folder: 'sent',
-      timestamp: new Date().toISOString()
-    };
-    
-    emails.push(newEmail);
-    
-    // Also add a copy to the recipient's inbox
-    const recipientCopy = {
-      id: emails.length > 0 ? Math.max(...emails.map(e => e.id)) + 1 : 1,
-      from: newEmail.from,
-      to: newEmail.to,
-      subject: newEmail.subject,
-      content: newEmail.content,
-      read: false,
-      folder: 'inbox',
-      timestamp: new Date().toISOString()
-    };
-    
-    emails.push(recipientCopy);
-    
-    res.status(200).json(newEmail);
+  app.post('/api/emails', async (req: Request, res: Response) => {
+    try {
+      const { sendEmail } = await import('./sendgrid');
+      
+      const newEmail = {
+        id: emails.length > 0 ? Math.max(...emails.map(e => e.id)) + 1 : 1,
+        ...req.body,
+        read: true,
+        folder: 'sent',
+        timestamp: new Date().toISOString()
+      };
+      
+      // Send email using SendGrid
+      const emailSent = await sendEmail({
+        to: newEmail.to,
+        from: newEmail.from,
+        subject: newEmail.subject,
+        text: newEmail.content,
+        html: `<div>${newEmail.content.replace(/\n/g, '<br>')}</div>`
+      });
+      
+      if (emailSent) {
+        // Add to sent folder
+        emails.push(newEmail);
+        
+        // Also add to recipient's inbox if it's to a local address
+        if (newEmail.to.includes('@centrifugalforce.free.nf')) {
+          const recipientCopy = {
+            id: emails.length > 0 ? Math.max(...emails.map(e => e.id)) + 1 : 1,
+            from: newEmail.from,
+            to: newEmail.to,
+            subject: newEmail.subject,
+            content: newEmail.content,
+            read: false,
+            folder: 'inbox',
+            timestamp: new Date().toISOString()
+          };
+          
+          emails.push(recipientCopy);
+        }
+        
+        res.status(200).json(newEmail);
+      } else {
+        res.status(500).json({ error: 'Failed to send email through SendGrid' });
+      }
+    } catch (error) {
+      console.error('Error sending email:', error);
+      res.status(500).json({ error: 'Failed to send email' });
+    }
   });
 
   app.put('/api/emails/:id', (req: Request, res: Response) => {
