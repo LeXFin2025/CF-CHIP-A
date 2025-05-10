@@ -1,66 +1,91 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { User } from '@/types';
-import { 
+import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { UserCog, LogOut, Mail, User as UserIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { UserCog, LogOut } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface UserMenuProps {
   user: User | null;
-  trigger: ReactNode;
 }
 
-export function UserMenu({ user, trigger }: UserMenuProps) {
-  const [, navigate] = useLocation();
-  
-  if (!user) {
-    return (
-      <Button 
-        variant="outline" 
-        className="flex items-center gap-2"
-        onClick={() => window.open("/__repl_auth/login", "auth", "width=500,height=600")}
-      >
-        <UserIcon className="h-4 w-4" />
-        Sign in with Replit
-      </Button>
-    );
-  }
-  
+const UserMenu = ({ user }: UserMenuProps) => {
+  const [currentUser, setCurrentUser] = useState<User | null>(user);
+  const location = useLocation();
+
+  useEffect(() => {
+    const handleAuthentication = (event: MessageEvent) => {
+      if (event.origin === 'https://auth.util.repl.co') {
+        setCurrentUser(event.data.user);
+        window.removeEventListener('message', handleAuthentication);
+      }
+    };
+    window.addEventListener('message', handleAuthentication);
+
+    return () => {
+      window.removeEventListener('message', handleAuthentication);
+    };
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.href = '/';
+    setTimeout(() => {
+      window.location.href = `https://replit.com/auth_with_repl_site/logout?domain=${window.location.host}`;
+    }, 100);
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <div className="cursor-pointer">
-          {trigger}
-        </div>
+        <Button>{currentUser ? currentUser.username : 'Login / Sign Up'}</Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56">
-        <DropdownMenuLabel>
-          <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium">{user?.displayName || user?.username || 'Guest'}</p>
-            <p className="text-xs text-muted-foreground">{user?.email || 'No email'}</p>
+      <DropdownMenuContent>
+        {currentUser ? (
+          <>
+            <DropdownMenuLabel>
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium">{currentUser.username}</p>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => navigate('/settings')}>
+              <UserCog className="h-4 w-4 mr-2" />
+              <span>Settings</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleLogout}>
+              <LogOut className="h-4 w-4 mr-2" />
+              <span>Sign Out</span>
+            </DropdownMenuItem>
+          </>
+        ) : (
+          <div>
+            <span>Please log in or sign up</span>
+            <div>
+              <script
+                authed="location.reload()"
+                src="https://auth.util.repl.co/script.js"
+              ></script>
+            </div>
           </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => navigate('/mail')}>
-          <Mail className="h-4 w-4 mr-2" />
-          <span>Inbox</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate('/settings')}>
-          <UserCog className="h-4 w-4 mr-2" />
-          <span>Account Settings</span>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <LogOut className="h-4 w-4 mr-2" />
-          <span>Sign Out</span>
-        </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
+};
+
+export default UserMenu;
